@@ -1,0 +1,59 @@
+# ------------------------------------------------
+# 📌 Import Libraries
+# ------------------------------------------------
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder, OneHotEncoder, PolynomialFeatures
+
+# ------------------------------------------------
+#  Sample Data
+# ------------------------------------------------
+data = {
+    'Name': ['Ali', 'Sara', 'Ahmed', 'Zara', 'Omar'],
+    'Age': [25, 30, 22, 28, 35],
+    'Salary': [50000, 60000, 45000, 70000, 80000],
+    'Department': ['HR', 'IT', 'Finance', 'IT', 'HR']
+}
+df = pd.DataFrame(data)
+print("Original Data:\n", df)
+
+# ------------------------------------------------
+#  1. Binning / Bucketing (Group ages into categories)
+# ------------------------------------------------
+df['Age_Group'] = pd.cut(df['Age'], bins=[0, 25, 30, 40], labels=['Young', 'Mid', 'Senior'])
+print(" After Binning:\n", df[['Age', 'Age_Group']])
+
+# ------------------------------------------------
+# 2. Encoding Categorical Variables
+# ------------------------------------------------
+# Label Encoding
+df['Dept_Label'] = LabelEncoder().fit_transform(df['Department'])
+
+# One-Hot Encoding
+df_onehot = pd.get_dummies(df, columns=['Department'], prefix='Dept')
+print(" After Encoding:\n", df[['Department', 'Dept_Label']])
+print("One-Hot Encoded Data:\n", df_onehot)
+
+# ------------------------------------------------
+# 3. Feature Scaling (Normalize Salary & Age)
+# ------------------------------------------------
+scaler = StandardScaler()
+df[['Age_scaled', 'Salary_scaled']] = scaler.fit_transform(df[['Age', 'Salary']])
+
+minmax = MinMaxScaler()
+df[['Age_minmax', 'Salary_minmax']] = minmax.fit_transform(df[['Age', 'Salary']])
+print("After Scaling:\n", df[['Age', 'Salary', 'Age_scaled', 'Salary_scaled']])
+
+# ------------------------------------------------
+# 4. Feature Interaction (Polynomial Features)
+# ------------------------------------------------
+poly = PolynomialFeatures(degree=2, include_bias=False)
+poly_features = poly.fit_transform(df[['Age', 'Salary']])
+poly_df = pd.DataFrame(poly_features, columns=poly.get_feature_names_out(['Age', 'Salary']))
+print("Polynomial Features:\n", poly_df.head())
+
+# ------------------------------------------------
+# 5. Feature Extraction (Length of Name)
+# ------------------------------------------------
+df['Name_Length'] = df['Name'].apply(len)
+print("Extracted Feature (Name Length):\n", df[['Name', 'Name_Length']])
